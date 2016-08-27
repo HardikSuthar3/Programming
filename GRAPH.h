@@ -76,6 +76,10 @@ class Graph {
         return n;
     }
 
+
+    void addEdge(int src, int dst) {
+        addEdge(src, dst, 0);
+    }
     void addEdge(int src, int dst, float weight) {
 
         Node *source, *dest;

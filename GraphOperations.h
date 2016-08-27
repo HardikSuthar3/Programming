@@ -14,6 +14,19 @@ Graph Mat2Graph(float **g, int n) {
     return G;
 }
 
+///Reverses the edges
+void Transpose(Graph &G) {
+    FORIT(it, G.V) {
+        it->second->adjNode.clear();
+        it->second->adjEdge.clear();
+    }
+
+    EACH(item, G.E) {
+        swap(item->from, item->to);
+        item->from->adjNode.pb(item->to);
+        item->from->adjEdge.pb(item);
+    }
+}
 
 // Traversal
 vector<Node *> BFS(Graph &G, Node *root) {
@@ -49,6 +62,7 @@ vector<Node *> DFS(Graph &G, Node *root) {
         output.pb(root);
         FORIT(item, root->adjNode) {
             if ((*item)->isVisited == false) {
+                G.Union(root, (*item));
                 DFS(G, *item);
             }
         }
@@ -173,14 +187,33 @@ bool is_M_Color(Graph &G, int m, int v) {
     return false;
 }
 
-void ShortestPathWithTopologicalSort(Graph &G, Node *root) {
+
+/// This Function Finds shortest path distance from source vertice to all other vertice
+/// \param G : Graph
+/// \param root : Source Vertive
+/// Generates the distance in Node::distance variable.
+void SingleSourceShortestPathWithTopologicalSort(Graph &G, Node *root) {
     vector<Node *> topOrder = TopologicalSort(G);
-    root->distance = 0;
+
     EACH(item, topOrder) {
+        item->distance = INT_MAX;
         item->isVisited = false;
     }
+    root->distance = 0;
     EACH(item, topOrder) {
+        Node *u = item;
+        if (item->distance != INT_MAX) {
+            EACH(edge, item->adjEdge) {
+                Node *v = edge->to;
+                if (u->distance + edge->weight < v->distance) {
+                    v->distance = u->distance + edge->weight;
+                    v->parent = u;
+
+                }
+            }
+        }
     }
+
 }
 
 
@@ -356,5 +389,48 @@ void FloydWarshall(float **d, int n) {
         }
     }
 
+}
+
+
+
+/// Stringly Connected Components
+
+set<Node *> ConnectedComponents(Graph &G) {
+    set<Node *> connComp;
+    static stack<Node *> topologicalStack;
+
+
+    FORIT(it, G.V) {
+        if (!it->second->isVisited) {
+            _TopologicalSortUtil(G, it->second, topologicalStack);
+        }
+    }
+
+    Transpose(G);
+
+    FORIT(it, G.V) {
+        it->second->isVisited = false;
+        it->second->uf_parent = it->second;
+    }
+
+
+    while (!topologicalStack.empty()) {
+        Node *u = topologicalStack.top();
+        if (!u->isVisited) {
+            connComp.insert(u->uf_parent);
+            u->isVisited = true;
+            EACH(item, u->adjNode) {
+                if (!item->isVisited) {
+                    G.Union(u, item);
+                    DFS(G, item);
+                }
+
+            }
+        }
+
+        topologicalStack.pop();
+    }
+
+    return connComp;
 }
 
