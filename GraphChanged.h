@@ -1,77 +1,150 @@
 #include "GRAPH.h"
+#define NP Node*
+#define EP Edge*
 
 
-Graph Mat2Graph(float **g, int n) {
+map<int, NP> V;
+vector<EP> E;
 
-    Graph G;
+void MakeGraph(int n, int m) {
+    REP(i, m) {
+        int u, v;
+        float w;
+        cin >> u >> v >> w;
+        Node *x, *y;
+        if (V.find(u) != V.end()) x = V[u];
+        else {
+            x = new Node
+                    (u);
+            V.insert(mp(u, x));
+        }
+        if (V.find(v) != V.end()) y = V[v];
+        else {
+            y = new Node
+                    (v);
+            V.insert(mp(v, y));
+        }
+        Edge *e = new Edge(x, y, w);
+        E.pb(e);
+        x->adje.pb(e);
+    }
+}
+
+void ClearGraph() {
+    V.clear();
+    E.clear();
+}
+
+void PrintGraph() {
+    cout << "Nodes" << endl;
+    FOREACH(it, V) {
+        NP u = it->second;
+        cout << u->val << ": ";
+        REP(i, u->adje.size()) {
+            EP e = u->adje[i];
+            NP v = e->second;
+            cout << v->val << " ";
+        }
+        cout << endl;
+    }
+    cout << "Edges" << endl;
+
+    EACH(item, E) {
+        cout << item->first->val << " " << item->second->val << ":" << item->w << endl;
+    }
+}
+
+
+void Mat2Graph(float **g, int n) {
+
+    REP(i, n) {
+        NP n = new Node(i);
+        V.insert(mp(i, n));
+    }
+
     FOR(i, 0, n - 1) {
         FOR(j, 0, n - 1) {
             if (g[i][j] != 0) {
-                G.addEdge(i, j, g[i][j]);
+                NP u = V[i];
+                NP v = V[j];
+                EP e = new Edge(u, v, g[i][j]);
+                u->adje.pb(e);
             }
         }
     }
-    return G;
+
 }
 
 ///Reverses the edges
-void Transpose(Graph &G) {
-    FORIT(it, G.V) {
+void Transpose() {
+    FORIT(it, V) {
         it->second->adjNode.clear();
         it->second->adje.clear();
     }
 
-    EACH(item, G.E) {
+    EACH(item, E) {
         swap(item->first, item->second);
-        item->first->adjNode.pb(item->second);
+//        item->first->adjNode.pb(item->second);
         item->first->adje.pb(item);
     }
 }
 
-// Traversal
-vector<Node *> BFS(Graph &G, Node *root) {
 
-    vector<Node *> output;
-    queue<Node *, deque<Node * >> bfsQueue;
-    bfsQueue.push(root);
-
-    while (!bfsQueue.empty()) {
-        Node *u = bfsQueue.front();
-        bfsQueue.pop();
-        output.pb(u);
-//        cout << u->val << endl;
-
-        FORIT(item, u->adjNode) {
-            (*item)->par = u;
-            if ((*item)->used == false) {
-                (*item)->used = true;
-                (*item)->d = u->d + 1;
-                bfsQueue.push((*item));
-            }
-
-        }
+void UfInit() {
+    FOREACH(it, V) {
+        it->second->upar = it->second;
     }
-
-    return output;
+}
+NP Find(NP x) {
+    if (*x == *x->upar) {
+        return x;
+    }
+    return x->upar = Find(x->upar);
 }
 
-vector<Node *> DFS(Graph &G, Node *root) {
-    static vector<Node *> output;
-    if (root != nullptr) {
-        root->used = true;
-        output.pb(root);
-        FORIT(item, root->adjNode) {
-            if ((*item)->used == false) {
-                G.Union(root, (*item));
-                DFS(G, *item);
+void Union(NP x, NP y) {
+    NP xp = Find(x);
+    NP yp = Find(y);
+    yp->upar = xp;
+}
+
+vector<NP> DFS(NP r) {
+    static vector<NP> dfs;
+    if (r->used)
+        return dfs;
+    r->used = true;
+    dfs.pb(r);
+    REP(i, r->adje.size()) {
+        Node *v = r->adje[i]->second;
+        if (!v->used) {
+            DFS(v);
+        }
+    }
+    return dfs;
+}
+
+vector<NP> BFS(NP r) {
+    queue<NP> q;
+    vector<NP> bfs;
+    q.push(r);
+    r->used = true;
+    while (!q.empty()) {
+        NP u = q.front();
+        q.pop();
+        bfs.pb(u);
+        cout << u->val << " ";
+        REP(i, u->adje.size()) {
+            NP v = u->adje[i]->second;
+            if (v->used == false) {
+                q.push(v);
+                v->used = true;
             }
         }
     }
-    return output;
+    return bfs;
 }
 
-
-Node *_ShortestPathBFS(Graph &G, Node *root, int val) {
+NP _ShortestPathBFS(NP root, int val) {
     queue<Node *, list<Node * >>
             bfsQueue;
     bfsQueue.push(root);
@@ -83,20 +156,20 @@ Node *_ShortestPathBFS(Graph &G, Node *root, int val) {
         if (u->val == val)
             return u;
 
-        FORIT(item, u->adjNode) {
-            (*item)->par = u;
-            if ((*item)->used == false) {
-                (*item)->used = true;
-                (*item)->d = u->d + 1;
-                bfsQueue.push((*item));
+        FORIT(it, u->adje) {
+            NP v = (*it)->second;
+            if (v->used == false) {
+                v->used = true;
+                v->d = u->d + 1;
+                bfsQueue.push(v);
             }
 
         }
     }
     return nullptr;
 }
-vector<Node *> ShortestPathBFS(Graph &G, Node *root, int val) {
-    Node *node = _ShortestPathBFS(G, root, val);
+vector<NP> ShortestPathBFS(NP root, int val) {
+    Node *node = _ShortestPathBFS(root, val);
     vector<Node *> path;
     if (node != nullptr) {
         while (node != nullptr) {
@@ -108,27 +181,26 @@ vector<Node *> ShortestPathBFS(Graph &G, Node *root, int val) {
     return path;
 }
 
-
-int _TopologicalSortUtil(Graph &G, Node *root, stack<Node *> &topologicalStack) {
+int _TopologicalSortUtil(Node *root, stack<Node *> &topologicalStack) {
 
     static int visitCount = 0;
     root->used = true;
     visitCount++;
-    FORIT(item, root->adjNode) {
-        if (!(*item)->used) {
-            _TopologicalSortUtil(G, *item, topologicalStack);
+    FORIT(item, root->adje) {
+        if (!(*item)->second->used) {
+            _TopologicalSortUtil((*item)->second, topologicalStack);
         }
     }
 
     topologicalStack.push(root);
 }
-vector<Node *> TopologicalSort(Graph &G) {
+vector<Node *> TopologicalSort() {
 
     vector<Node *> output;
     static stack<Node *> topologicalStack;
-    FORIT(it, G.V) {
+    FORIT(it, V) {
         if (!it->second->used) {
-            _TopologicalSortUtil(G, it->second, topologicalStack);
+            _TopologicalSortUtil(it->second, topologicalStack);
         }
     }
 
@@ -141,36 +213,20 @@ vector<Node *> TopologicalSort(Graph &G) {
     return output;
 }
 
-bool isCyclePresent(Graph &G) {
-    FOREACH(item, G.V) {
-        item->second->par = item->second;
-    }
 
-    FOREACH(it, G.E) {
-        Node *x, *y;
-        x = G.Find((*it)->first);
-        y = G.Find((*it)->second);
-        if (x->val == y->val) {
-            return true;
-        }
-        G.Union(x, y);
-    }
+bool is_M_Color(int m, int v) {
 
-    return false;
-}
-
-bool is_M_Color(Graph &G, int m, int v) {
-
-    if (v == G.V.size())
+    if (v == V.size())
         return true;
-    auto it = G.V.begin();
+    auto it = V.begin();
     advance(it, v);
     Node *node = it->second;
 
     FOR(c, 1, m) {
         bool flag = true;
-        EACH(item, node->adjNode) {
-            if (item->col == c) {
+        EACH(item, node->adje) {
+            NP v = item->second;
+            if (v->col == c) {
                 flag = false;
                 break;
             }
@@ -179,11 +235,29 @@ bool is_M_Color(Graph &G, int m, int v) {
             continue;
         } else {
             node->col = c;
-            if (is_M_Color(G, m, v + 1))
+            if (is_M_Color(m, v + 1))
                 return true;
             node->col = 0;
         }
     }
+    return false;
+}
+
+bool isCyclePresent() {
+    FOREACH(item, V) {
+        item->second->par = item->second;
+    }
+
+    FOREACH(it, E) {
+
+        NP x = Find((*it)->first);
+        NP y = Find((*it)->second);
+        if (x->val == y->val) {
+            return true;
+        }
+        Union(x, y);
+    }
+
     return false;
 }
 
@@ -192,8 +266,8 @@ bool is_M_Color(Graph &G, int m, int v) {
 /// \param G : Graph
 /// \param root : Source Vertive
 /// Generates the distance in Node::distance variable.
-void SingleSourceShortestPathWithTopologicalSort(Graph &G, Node *root) {
-    vector<Node *> topOrder = TopologicalSort(G);
+void SingleSourceShortestPathWithTopologicalSort(NP root) {
+    vector<NP> topOrder = TopologicalSort();
 
     EACH(item, topOrder) {
         item->d = INT_MAX;
@@ -204,9 +278,9 @@ void SingleSourceShortestPathWithTopologicalSort(Graph &G, Node *root) {
         Node *u = item;
         if (item->d != INT_MAX) {
             EACH(edge, item->adje) {
-                Node *v = edge->to;
-                if (u->d + edge->weight < v->d) {
-                    v->d = u->d + edge->weight;
+                Node *v = edge->second;
+                if (u->d + edge->w < v->d) {
+                    v->d = u->d + edge->w;
                     v->par = u;
 
                 }
@@ -216,15 +290,13 @@ void SingleSourceShortestPathWithTopologicalSort(Graph &G, Node *root) {
 
 }
 
-
-
 /// Minimum Spanning Tree
 
-vector<Node *> PrimsMST(Graph &G, Node *root) {
-    vector<Node *> vec;
+vector<NP> PrimsMST(Node *root) {
+    vector<NP> vec;
 
-    FORIT(it, G.V) {
-        Node *tmp = it->second;
+    FORIT(it, V) {
+        NP tmp = it->second;
         tmp->par = nullptr;
         tmp->used = false;
         tmp->d = INT_MAX;
@@ -258,9 +330,9 @@ vector<Node *> PrimsMST(Graph &G, Node *root) {
 
         output.pb(node);
         EACH(item, node->adje) {
-            Node *v = item->to;
-            if (item->weight < v->d) {
-                v->d = item->weight;
+            Node *v = item->second;
+            if (item->w < v->d) {
+                v->d = item->w;
                 v->par = node;
             }
             flag = true;
@@ -272,20 +344,20 @@ vector<Node *> PrimsMST(Graph &G, Node *root) {
 
 }
 
-vector<Edge *> KrushkalMST(Graph &G) {
+vector<EP> KrushkalMST() {
     // Sort the edges based on w
     function<bool(Edge *&, Edge *&)> funObj(
             [](Edge *&x, Edge *&y) -> bool { return (x->w < y->w); });
 
-    sort(G.E.begin(), G.E.end(), funObj);
+    sort(E.begin(), E.end(), funObj);
     int verticeCount = 0;
 
     vector<Edge *> vec;
-    EACH(edge, G.E) {
+    EACH(edge, E) {
         Node *u, *v;
 
-        u = G.Find(edge->first);
-        v = G.Find(edge->second);
+        u = Find(edge->first);
+        v = Find(edge->second);
 
         if (u->val != v->val) {
             vec.pb(edge);
@@ -297,7 +369,7 @@ vector<Edge *> KrushkalMST(Graph &G) {
                 edge->second->used = true;
                 verticeCount++;
             }
-            if (verticeCount == G.V.size())
+            if (verticeCount == V.size())
                 break;
         }
     }
@@ -311,13 +383,13 @@ vector<Edge *> KrushkalMST(Graph &G) {
 
 /// Shortest Path
 
-vector<Node *> Dijkstra(Graph &G, Node *source) {
+vector<Node *> Dijkstra(Node *source) {
 
     // Initiliase Single Source Graph
     //NITIALIZE SINGLE SOURCE()
 
     vector<Node *> Q;
-    FOREACH(it, G.V) {
+    FOREACH(it, V) {
         it->second->d = INT_MAX;
         it->second->par = nullptr;
         Q.pb(it->second);
@@ -341,9 +413,9 @@ vector<Node *> Dijkstra(Graph &G, Node *source) {
         distVect.pb(u->d);
 
         EACH(item, u->adje) {
-            Node *v = item->to;
-            if (v->d > u->d + item->weight) {
-                v->d = u->d + item->weight;
+            Node *v = item->second;
+            if (v->d > u->d + item->w) {
+                v->d = u->d + item->w;
             }
         }
         make_heap(Q.begin(), Q.end(), funObj);
@@ -353,9 +425,9 @@ vector<Node *> Dijkstra(Graph &G, Node *source) {
 
 }
 
-void BellmanFord(Graph &G, Node *source) {
+void BellmanFord(Node *source) {
     // Initialize
-    FOREACH(it, G.V) {
+    FOREACH(it, V) {
         Node *node = it->second;
         node->par = nullptr;
         node->d = INT_MAX;
@@ -364,14 +436,14 @@ void BellmanFord(Graph &G, Node *source) {
     source->par = source;
     source->d = 0;
 
-    FOREACH(it, G.V) {
+    FOREACH(it, V) {
         Node *u = it->second;
         EACH(item, u->adje) {
-            Node *v = item->to;
+            Node *v = item->second;
             if (*v == *source)
                 continue;
-            if (v->d > u->d + item->weight) {
-                v->d = u->d + item->weight;
+            if (v->d > u->d + item->w) {
+                v->d = u->d + item->w;
             }
         }
     }
@@ -395,20 +467,20 @@ void FloydWarshall(float **d, int n) {
 
 /// Stringly Connected Components
 
-set<Node *> ConnectedComponents(Graph &G) {
+set<Node *> ConnectedComponents() {
     set<Node *> connComp;
     static stack<Node *> topologicalStack;
 
 
-    FORIT(it, G.V) {
+    FORIT(it, V) {
         if (!it->second->used) {
-            _TopologicalSortUtil(G, it->second, topologicalStack);
+            _TopologicalSortUtil(it->second, topologicalStack);
         }
     }
 
-    Transpose(G);
+    Transpose();
 
-    FORIT(it, G.V) {
+    FORIT(it, V) {
         it->second->used = false;
         it->second->upar = it->second;
     }
@@ -419,10 +491,10 @@ set<Node *> ConnectedComponents(Graph &G) {
         if (!u->used) {
             connComp.insert(u->upar);
             u->used = true;
-            EACH(item, u->adjNode) {
-                if (!item->used) {
-                    G.Union(u, item);
-                    DFS(G, item);
+            EACH(item, u->adje) {
+                if (!item->second->used) {
+                    Union(u, item->second);
+                    DFS(item->second);
                 }
 
             }
@@ -433,4 +505,10 @@ set<Node *> ConnectedComponents(Graph &G) {
 
     return connComp;
 }
+
+
+
+
+
+
 

@@ -1,3 +1,4 @@
+/*
 #include "TEMPLATE.h"
 
 class Edge;
@@ -6,46 +7,47 @@ class Edge;
 class Node {
 
  public:
-    int val;
-    int col;
-    float d;
+    int value;
+    int color;
+    float distance;
 
 
-    bool used;
+    bool isVisited;
 
     vector<Node *> adjNode;
-    vector<Edge *> adje; // Adjcent Edge
+    vector<Edge *> adjEdge;
 
 
-    Node *par;
-    Node *upar;
+    Node *parent;
+    Node *uf_parent;
 
     bool operator==(const Node &rhs) const {
-        return this->val == rhs.val;
+        return this->value == rhs.value;
     }
     bool operator!=(const Node &rhs) const {
-        return this->val != rhs.val;
+        return this->value != rhs.value;
     }
     Node(int value) {
-        this->val = value;
-        this->used = false;
-        this->par = nullptr;
-        this->d = 0;
-        this->upar = this;
+        this->value = value;
+        this->isVisited = false;
+        this->parent = nullptr;
+        this->distance = 0;
+        this->uf_parent = this;
     }
 
 };
 
 class Edge {
  public:
-    float w;
-    Node *first, *second;
-    bool used;
+    float weight;
+    Node *from, *to;
+    bool isVisited;
+
     Edge(Node *from, Node *to, float weight) {
-        this->first = from;
-        this->second = to;
-        this->w = weight;
-        this->used = false;
+        this->from = from;
+        this->to = to;
+        this->weight = weight;
+        this->isVisited = false;
     }
 
 };
@@ -97,8 +99,8 @@ class Graph {
         Edge *edge = new Edge(source, dest, weight);
         E.pb(edge);
         source->adjNode.pb(dest);
-        source->adje.pb(edge);
-        edgeMap.insert(mp(to_string(source->val) + "," + to_string(dest->val), edge));
+        source->adjEdge.pb(edge);
+        edgeMap.insert(mp(to_string(source->value) + "," + to_string(dest->value), edge));
     }
 
     void addUndirectedEdge(int src, int dst, float weight) {
@@ -120,11 +122,11 @@ class Graph {
         E.pb(edge);
         source->adjNode.pb(dest);
         dest->adjNode.pb(source);
-        edgeMap.insert(mp(to_string(source->val) + "," + to_string(dest->val), edge));
+        edgeMap.insert(mp(to_string(source->value) + "," + to_string(dest->value), edge));
     }
 
     Edge *getEdge(Node *&a, Node *&b) {
-        return edgeMap.at(to_string(a->val) + to_string(b->val));
+        return edgeMap.at(to_string(a->value) + to_string(b->value));
     }
 
     Edge *getEdge(int a, int b) {
@@ -133,39 +135,42 @@ class Graph {
 
 
     Node *Find(Node *x) {
-        if (x->upar->val != x->val) {
-            x->upar = Find(x->upar);
+        if (x->uf_parent->value != x->value) {
+            x->uf_parent = Find(x->uf_parent);
         }
-        return x->upar;
+        return x->uf_parent;
     }
 
     void Union(Node *x, Node *y) {
         Node *xpar, *ypar;
         xpar = Find(x);
         ypar = Find(y);
-        if (xpar->d > ypar->d) {
-            ypar->upar = xpar;
-        } else if (ypar->d > xpar->d) {
-            xpar->upar = ypar;
+        if (xpar->distance > ypar->distance) {
+            ypar->uf_parent = xpar;
+        } else if (ypar->distance > xpar->distance) {
+            xpar->uf_parent = ypar;
         } else {
-            ypar->upar = xpar;
-            xpar->d++;
+            ypar->uf_parent = xpar;
+            xpar->distance++;
         }
     }
 
-    /*void DFS(Node *root) {
+    */
+/*void DFS(Node *root) {
         if (root == nullptr)
             return;
         root->used = true;
-        cout << root->val << endl;
+        cout << root->value << endl;
         FORIT(item, root->adjNode) {
             if ((*item)->used == false) {
                 DFS(*item);
             }
         }
-    }*/
+    }*//*
 
-    /*void BFS(Node *root) {
+
+    */
+/*void BFS(Node *root) {
         queue<Node *, deque<Node * >> bfsQueue;
         bfsQueue.push(root);
 
@@ -173,27 +178,29 @@ class Graph {
             Node *u = bfsQueue.front();
             bfsQueue.pop();
 
-            cout << u->val << endl;
+            cout << u->value << endl;
 
             FORIT(item, u->adjNode) {
-                (*item)->par = u;
+                (*item)->parent = u;
                 if ((*item)->used == false) {
                     (*item)->used = true;
-                    (*item)->d = u->d + 1;
+                    (*item)->distance = u->distance + 1;
                     bfsQueue.push((*item));
                 }
 
             }
         }
-    }*/
+    }*//*
 
-    /*void ShortestPathBFS(Node *root, int val) {
+
+    */
+/*void ShortestPathBFS(Node *root, int val) {
         Node *node = _ShortestPathBFS(root, val);
         if (node != nullptr) {
             vector<int> path;
             while (node != nullptr) {
-                path.pb(node->val);
-                node = node->par;
+                path.pb(node->value);
+                node = node->parent;
             }
             reverse(path.begin(), path.end());
             cout << path;
@@ -201,7 +208,9 @@ class Graph {
             cout << "NA";
         }
         cout << endl;
-    }*/
+    }*//*
+
 
 
 };
+*/
