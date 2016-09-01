@@ -1,45 +1,35 @@
-#include "GRAPH.h"
+#include "BinaryTree/BTree.h"
 
 
-int main() {
-    // CoinChange();
+long long C(int n, int r) {
+    if (r > n / 2) r = n - r; // because C(n, r) == C(n, n - r)
+    long long ans = 1;
+    int i;
 
-
-    MSI map;
-    map.insert(mp("A", 1));
-    map.insert(mp("B", 2));
-    map.insert(mp("C", 3));
-    map.insert(mp("D", 4));
-    map.insert(mp("E", 5));
-
-    MIS mapRev;
-    FOREACH(it, map) {
-        mapRev.insert(mp(it->second, it->first));
+    for (i = 1; i <= r; i++) {
+        ans *= n - r + i;
+        ans /= i;
     }
 
-    Graph G;
+    return ans;
+}
 
-    G.addEdge(map.at("A"), map.at("B"), -1);
-    G.addEdge(map.at("B"), map.at("E"), 2);
-    G.addEdge(map.at("E"), map.at("D"), -3);
-    G.addEdge(map.at("D"), map.at("C"), 5);
-    G.addEdge(map.at("A"), map.at("C"), 4);
-    G.addEdge(map.at("B"), map.at("C"), 3);
-    G.addEdge(map.at("B"), map.at("D"), 2);
-    G.addEdge(map.at("D"), map.at("B"), 1);
+int main() {
+    /* int t;
+     cin >> t;
 
-//     cout << (G.is_M_Color(3, 0) ? "Yes" : "No");
-/*
-    G.BellmanFord(G.V.at(1));
+     t--;
+     int n, m;
+     cin >> n >> m;
+     MakeGraph(n, m);
+     PrintGraph();*/
+    BT T(1);
+    T.Add(1, 2, 3);
+    T.Add(2, 4, 5);
 
-    FORIT(it, G.V) {
-        Node *n = it->second;
-        cout << mapRev.at(n->value) << ": " << n->distance << endl;
-    }*/
-
-    int a = 10;
-    hash<Node *> objHash;
-    cout << objHash(G.V.at(map["A"]));
-
+    cout << T.Diameter(T.V[1]);
     return 0;
 }
+
+
+

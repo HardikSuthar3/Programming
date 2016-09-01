@@ -103,8 +103,7 @@ void APAC3() {
             cin >> a;
             cin >> b;
             cout << "Case #" << testCount++ << ": " << (b - a) / a;
-        }
-        else {
+        } else {
             double a, b, c;
             cin >> a;
             cin >> b;

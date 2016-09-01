@@ -6,6 +6,8 @@
 #include <cctype>
 #include <typeinfo>
 #include <climits>
+#include <cfloat>
+#include <fstream>
 
 
 

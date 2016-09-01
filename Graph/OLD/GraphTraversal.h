@@ -100,7 +100,7 @@ class GraphTraversal: public Graph<T> {
 
     void TopologicalSort(Node<T> *root) {
 
-        _TopologicalSort(root);
+        _TopologicalSortUtil(root);
         bool first = true;
         cout << "[";
         while (!topologicalStack.empty()) {

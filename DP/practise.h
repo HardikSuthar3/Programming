@@ -398,7 +398,7 @@ int kadane(int *arr, int *start, int *finish, int n) {
     // initialize sum, maxSum and
     int sum = 0, maxSum = INT_MIN, i;
 
-    // Just some initial value to check for all negative values case
+    // Just some initial val to check for all negative values case
     *finish = -1;
 
     // local variable

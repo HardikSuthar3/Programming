@@ -36,7 +36,10 @@ void APAC() {
     while (T > 0) {
         T--;
         cin >> n;
+
         cin.ignore();
+
+
         vector<element *> vector1;
         for (int64_t i = 0; i < n; ++i) {
             string str;

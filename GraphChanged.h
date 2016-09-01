@@ -30,6 +30,26 @@ void MakeGraph(int n, int m) {
     }
 }
 
+void Mat2Graph(float **g, int n) {
+
+    REP(i, n) {
+        NP n = new Node(i);
+        V.insert(mp(i, n));
+    }
+
+    FOR(i, 0, n - 1) {
+        FOR(j, 0, n - 1) {
+            if (g[i][j] != 0) {
+                NP u = V[i];
+                NP v = V[j];
+                EP e = new Edge(u, v, g[i][j]);
+                u->adje.pb(e);
+            }
+        }
+    }
+
+}
+
 void ClearGraph() {
     V.clear();
     E.clear();
@@ -54,26 +74,6 @@ void PrintGraph() {
     }
 }
 
-
-void Mat2Graph(float **g, int n) {
-
-    REP(i, n) {
-        NP n = new Node(i);
-        V.insert(mp(i, n));
-    }
-
-    FOR(i, 0, n - 1) {
-        FOR(j, 0, n - 1) {
-            if (g[i][j] != 0) {
-                NP u = V[i];
-                NP v = V[j];
-                EP e = new Edge(u, v, g[i][j]);
-                u->adje.pb(e);
-            }
-        }
-    }
-
-}
 
 ///Reverses the edges
 void Transpose() {
@@ -465,7 +465,7 @@ void FloydWarshall(float **d, int n) {
 
 
 
-/// Stringly Connected Components
+/// Strongly Connected Components
 
 set<Node *> ConnectedComponents() {
     set<Node *> connComp;
