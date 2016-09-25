@@ -53,9 +53,3 @@ double cost(vector<pair<int, int>> ele, int i, int j, int k) {
     return (a + b + c);
 }
 
-
-void EggDroppingPuzzle() {
-    int n, k;
-    cin >> n >> k;
-    int
-}
