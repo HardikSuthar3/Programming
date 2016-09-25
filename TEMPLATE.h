@@ -1,4 +1,4 @@
-#include <iostream>
+/*#include <iostream>
 #include <sstream>
 #include <cstdio>
 #include <cmath>
@@ -23,8 +23,8 @@
 #include <deque>
 #include <stack>
 #include <algorithm>
-#include <functional>
-
+#include <functional>*/
+#include<bits/stdc++.h>
 
 using namespace std;
 
@@ -38,6 +38,53 @@ vector<string> split(const string &s, char delim) {
         elems.push_back(item);
     return elems;
 }
+long long C(int n, int r) {
+    if (r > n / 2) r = n - r; // because C(n, r) == C(n, n - r)
+    long long ans = 1;
+    int i;
+
+    for (i = 1; i <= r; i++) {
+        ans *= n - r + i;
+        ans /= i;
+    }
+
+    return ans;
+}
+
+// Loop
+#define FOR(i, a, b) for(int i=(a),_b=(b); i<=_b; i++)
+#define FORD(i, a, b) for(int i=(a),_b=(b); i>=_b; i--)
+#define REP(i, a) for(int i=0,_a=(a); i<_a; i++)
+#define EACH(item, container) for(auto &item : container)
+#define FOREACH(it, a) for(auto it = a.begin(); it != a.end(); ++it)
+#define FORIT(it, a) for(__typeof(a.begin()) it = a.begin(); it != a.end(); it++)
+
+/// Loop Ends
+
+
+
+/// Miscelleneous
+
+#define mp make_pair
+#define pb push_back
+#define popb pop_back
+#define pf push_front
+#define popf pop_front
+
+
+#define fi first
+#define se second
+
+#define DEBUG(x) { cout << #x << " = "; cout << (x) << endl; }
+
+#define MOD 1000000007
+
+inline bool EQ(double a, double b) { return fabs(a - b) < 1e-9; }
+
+inline bool EQ(float a, float b) { return fabs(a - b) < 1e-5; }
+
+/// Miscelleneous End
+
 
 
 /// TypeDef Start
@@ -87,39 +134,6 @@ typedef priority_queue<PII> PQPII;
 
 /// TypeDef End
 
-
-
-
-// Loop
-
-#define FOR(i, a, b) for(int i=(a),_b=(b); i<=_b; i++)
-#define FORD(i, a, b) for(int i=(a),_b=(b); i>=_b; i--)
-#define REP(i, a) for(int i=0,_a=(a); i<_a; i++)
-#define EACH(item, container) for(auto &item : container)
-#define FOREACH(it, a) for(auto it = a.begin(); it != a.end(); ++it)
-#define FORIT(it, a) for(__typeof(a.begin()) it = a.begin(); it != a.end(); it++)
-
-/// Loop Ends
-
-
-
-
-#define DEBUG(x) { cout << #x << " = "; cout << (x) << endl; }
-
-inline bool EQ(double a, double b) { return fabs(a - b) < 1e-9; }
-
-inline bool EQ(float a, float b) { return fabs(a - b) < 1e-5; }
-
-#define mod 1000000007
-
-#define fi first
-#define se second
-
-#define mp make_pair
-#define pb push_back
-#define popb pop_back
-#define pf push_front
-#define popf pop_front
 
 
 // Printing Containers

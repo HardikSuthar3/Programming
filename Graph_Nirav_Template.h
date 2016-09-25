@@ -1,70 +1,49 @@
-#include "TEMPLATE.h"
+#include <bits/stdc++.h>
+using namespace std;
 
 
-int V, E;
-VI G[1000];
-VPII edges;
+// Graph Structure
+int V, E, root;
+vector<int> G[1001];
+vector<pair<int, int>> edges;
 vector<pair<int, float>> W;
 int *par;
 bool *used;
-
+// End Structure
 
 void UFinit(int n) {
-    FOR(i, 0, n) {
+    for (int i = 0; i <= n; i++) {
         par[i] = i;
     }
-}
-int Find(int x) {
-    if (par[x] == x)
-        return x;
-    return par[x] = Find(par[x]);
-}
-
-void Union(int x, int y) {
-    int xp, yp;
-    xp = Find(x);
-    yp = Find(y);
-    par[yp] = xp;
-}
-
-void cleargraph() {
-    REP(i, 1000) {
-        G[i].clear();
-    }
-    edges.clear();
-    W.clear();
-    UFinit(V);
-    delete[] par;
-    delete[] used;
 }
 
 void MakeGraph(int n, int m) {
     V = n;
     E = m;
 
-    par = new int[n + 1];
-    used = new bool[n + 1];
+    par = new int[n];
+    used = new bool[n];
     fill(par, par + n + 1, -1);
     fill(used, used + n + 1, false);
 
-    REP(i, m) {
+    for (int i = 0; i < m; i++) {
         int u, v, w;
         cin >> u >> v >> w;
-        G[u].pb(i);
+        G[u].push_back(i);
 
-        // comment below to make directed graph
-        G[v].pb(i);
+//         comment below to make directed graph
+//        G[v].push_back(i);
 
-        edges.pb(mp(u, v));
-        W.pb(mp(i, w));
+        edges.push_back(make_pair(u, v));
+        W.push_back(make_pair(i, w));
     }
 }
 
-void printgraph() {
+void PrintGraph() {
     cout << "Nodes" << endl;
-    FOR(i, 0, V - 1) {
+    for (int i = 0; i < V; i++) {
         cout << i << " : ";
-        FOR(j, 0, G[i].size() - 1) {
+        for (int j = 0; j < G[i].size(); j++) {
             int eid = G[i][j];
             auto x = edges[eid];
             int adj = x.first ^x.second ^i;
@@ -72,34 +51,50 @@ void printgraph() {
         }
         cout << endl;
     }
-
+    cout << endl << endl;
     cout << "Edges" << endl;
-    REP(i, edges.size()) {
+    for (int i = 0; i < edges.size(); i++) {
         cout << edges[i].first << " " << edges[i].second << ": " << W[i].second << endl;
     }
 
-
-    cout << edges;
 }
+
 
 void TransposeGraph() {
-    REP(i, V) {
+    for (int i = 0; i < V; i++) {
         G[i].clear();
     }
-    REP(i, E) {
+    for (int i = 0; i < E; i++) {
         swap(edges[i].first, edges[i].second);
-        G[edges[i].first].pb(i);
+        G[edges[i].first].push_back(i);
+
+        // Uncommnet if Undirected Graph
+        G[edges[i].second].push_back(i);
     }
 }
 
-VI DFS(int v) {
-    static VI path;
+int Find(int x) {
+    if (par[x] == x)
+        return x;
+    return par[x] = Find(par[x]);
+}
+void Union(int x, int y) {
+    int xp, yp;
+    xp = Find(x);
+    yp = Find(y);
+    par[yp] = xp;
+}
+
+
+// Operations
+vector<int> DFS(int v) {
+    static vector<int> path;
     if (used[v]) {
         return path;
     }
     used[v] = true;
-    path.pb(v);
-    FOR(i, 0, G[v].size() - 1) {
+    path.push_back(v);
+    for (int i = 0; i < G[v].size(); i++) {
         int edgeNo = G[v][i];
         int x = edges[edgeNo].first;
         int y = edges[edgeNo].second ^v;
@@ -113,19 +108,19 @@ VI DFS(int v) {
     return path;
 }
 
-VI BFS(int r) {
+vector<int> BFS(int r) {
 
-    QI q;
+    queue<int> q;
     q.push(r);
 
-    VI res;
+    vector<int> res;
     used[r] = true;
 
     while (!q.empty()) {
         int v = q.front();
         q.pop();
-        res.pb(v);
-        FOR(i, 0, G[v].size() - 1) {
+        res.push_back(v);
+        for (int i = 0; i < G[v].size(); i++) {
             int eno = G[v][i];
             int adj = edges[eno].first ^edges[eno].second ^v;
             if (used[adj] == false) {
@@ -138,8 +133,8 @@ VI BFS(int r) {
     return res;
 }
 
-VI BFSPath(int r, int to) {
-    QI q;
+vector<int> BFSPath(int r, int to) {
+    queue<int> q;
     q.push(r);
 
     fill(par, par + 1000, -1);
@@ -148,14 +143,14 @@ VI BFSPath(int r, int to) {
     while (!q.empty()) {
         int v = q.front();
         q.pop();
-        FOR(i, 0, G[v].size() - 1) {
+        for (int i = 0; i < G[v].size(); i++) {
             int eno = G[v][i];
             int adj = edges[eno].first ^edges[eno].second ^v;
 
             par[adj] = v;
 
             if (adj == to) {
-                QI empty;
+                queue<int> empty;
                 swap(q, empty);
 //                while (!q.empty()) q.pop();
                 break;
@@ -167,9 +162,9 @@ VI BFSPath(int r, int to) {
             }
         }
     }
-    VI res;
+    vector<int> res;
     while (to != -1) {
-        res.pb(to);
+        res.push_back(to);
         to = par[to];
     }
     reverse(res.begin(), res.end());
@@ -177,14 +172,14 @@ VI BFSPath(int r, int to) {
 }
 
 
-SI _TOPUtil(int v) {
+stack<int> _TOPUtil(int v) {
     static stack<int> topst;
     if (used[v]) {
         return topst;
     }
     used[v] = true;
 
-    FOR(i, 0, G[v].size() - 1) {
+    for (int i = 0; i < G[v].size(); i++) {
         int edgeNo = G[v][i];
         int x = edges[edgeNo].first;
         int y = edges[edgeNo].second ^v;
@@ -200,17 +195,17 @@ SI _TOPUtil(int v) {
     return topst;
 }
 
-VI TOPSort(int r) {
-    SI topst = _TOPUtil(r);
-    FOR(i, 1, V - 1) {
+vector<int> TOPSort(int r) {
+    stack<int> topst = _TOPUtil(r);
+    for (int i = 0; i < V; i++) {
         if (used[i] == false) {
             topst = _TOPUtil(i);
         }
     }
 
-    VI op;
+    vector<int> op;
     while (!topst.empty()) {
-        op.pb(topst.top());
+        op.push_back(topst.top());
         topst.pop();
     }
     return op;
@@ -218,7 +213,7 @@ VI TOPSort(int r) {
 
 bool isCycle() {
     UFinit(V);
-    FOR(i, 0, edges.size() - 1) {
+    for (int i = 0; i < edges.size(); i++) {
         if (Find(edges[i].first) == Find(edges[i].second)) return true;
         Union(edges[i].first, edges[i].second);
     }
@@ -226,11 +221,11 @@ bool isCycle() {
 }
 
 bool isMColor(int m, int v) {
-    static VI col(V);
+    static vector<int> col(V);
     if (v > V) return true;
-    FOR(c, 1, m) {
+    for (int c = 1; c <= m; ++c) {
         bool flg = true;
-        FOR(i, 0, G[v].size() - 1) {
+        for (int i = 0; i < G[v].size(); i++) {
             int eno = G[v][i];
             int adj = edges[eno].first ^edges[eno].second ^v;
             if (col[adj] == c) {
@@ -249,38 +244,43 @@ bool isMColor(int m, int v) {
     return false;
 }
 
-void PRIMMst(int r) {
-    VF d(V);
-    fill(d.begin(), d.end(), DBL_MAX);
-    d[r] = 0;
-    VI ind;
 
-    VI mst;
-    REP(i, V)ind.pb(i);
+// Minimum Spanning Tree
 
-    function<bool(int &, int &)> compare([&d](int &u, int &v) -> bool { return (d[u] < d[v]); });
+vector<int> PrimMst(int r) {
+    vector<int> dist(V);
+    fill(dist.begin(), dist.end(), INT_MAX);
+    dist[r] = 0;
 
-    bool flag = true;
+    function<bool(int &, int &)> compare([&](int &u, int &v) -> bool { return (dist[u] > dist[v]); });
+
+    priority_queue<int, vector<int>, decltype(compare)> ind(compare);
+
+    ind.push(r);
+
+    long total_distance = 0;
+
+    used[root] = true;
     while (!ind.empty()) {
-        if (!flag) {
-            make_heap(ind.begin(), ind.end(), compare);
-            flag = false;
-        }
-        pop_heap(ind.begin(), ind.end(), compare);
-        int u = ind.back();
-        ind.pop_back();
-        mst.pb(u);
-        REP(i, G[u].size()) {
-            int eid = G[u][i];
-            int adj = edges[eid].first ^edges[eid].second ^u;
-            float w = W[eid].second;
-            if (d[adj] > w) {
-                d[adj] = w;
+        int u = ind.top();
+        ind.pop();
+
+        total_distance += dist[u];
+        for (int i = 0; i < G[u].size(); ++i) {
+            int eno = G[u][i];
+            pair<int, int> p = edges[eno];
+            int adj = p.first ^p.second ^u;
+            float w = W[eno].second;
+            if (dist[adj] > dist[u] + w) {
+                dist[adj] = w;
+                if (used[adj] == false) {
+                    ind.push(adj);
+                    used[adj] = true;
+                }
             }
         }
     }
-
-    cout << mst;
+    return dist;
 }
 
 void KrushkalsMst() {
@@ -292,16 +292,16 @@ void KrushkalsMst() {
 
     sort(W.begin(), W.end(), compare);
     int vc = 0;
-    int i = 0;
+    int i = 0; // Number of Edges in solution
 
-    VPII op;
-    VF we;
-    while (vc < V) {
+    vector<pair<int, int>> op;
+    vector<float> we;
+    while (i < V) {
         int eid = W[i].first;
         if (Find(edges[eid].first) != Find(edges[eid].second)) {
             Union(edges[eid].first, edges[eid].second);
-            op.pb(edges[eid]);
-            we.pb(W[i].second);
+            op.push_back(edges[eid]);
+            we.push_back(W[i].second);
             if (used[edges[eid].first] == false) {
                 vc++;
                 used[edges[eid].first] = true;
@@ -315,55 +315,104 @@ void KrushkalsMst() {
 
     }
 
-    FOR(i, 0, op.size() - 1) {
+    for (int i = 0; i < op.size(); i++) {
         cout << op[i].first << " " << op[i].second << ": " << we[i] << endl;
     }
 }
 
-VF Dijkstra(int r) {
-    VF d(V);
-    fill(d.begin(), d.end(), DBL_MAX);
-    d[r] = 0;
-    VI ind;
 
-    VI path;
-    REP(i, V)ind.pb(i);
+// Shortest Path Algorithms
 
-    function<bool(int &, int &)> compare([&d](int &u, int &v) -> bool { return (d[u] < d[v]); });
+vector<float> Dijkastra(int src) {
+    vector<int> q;
 
-    bool flag = true;
-    while (!ind.empty()) {
-        if (!flag) {
-            make_heap(ind.begin(), ind.end(), compare);
-            flag = false;
-        }
-        pop_heap(ind.begin(), ind.end(), compare);
-        int u = ind.back();
-        ind.pop_back();
-        path.pb(u);
-        REP(i, G[u].size()) {
+    vector<float> dist(V);
+    fill(dist.begin(), dist.end(), FLT_MAX);
+    dist[src] = 0;
+    q.push_back(src);
+
+    // Declare Comparator
+    function<bool(int &, int &)> comparator(
+            [&](int &a, int &b) -> bool {
+                return dist[a] < dist[b];
+            }
+    );
+    while (!q.empty()) {
+        auto it = min_element(q.begin(), q.end(), comparator);
+        int u = *it;
+        q.erase(it);
+        used[u] = true;
+        for (int i = 0; i < G[u].size(); i++) {
             int eid = G[u][i];
             int adj = edges[eid].first ^edges[eid].second ^u;
-            float w = W[eid].second;
-            if (d[adj] > d[u] + w) {
-                d[adj] = d[u] + w;
+            if (dist[adj] > dist[u] + W[eid].second) {
+                dist[adj] = dist[u] + W[eid].second;
+                q.push_back(adj);
+                par[adj] = u;
             }
         }
     }
 
-    return d;
 }
 
-VI ConnectedComponents() {
-    VI top = TOPSort(0);
+vector<float> BellmanFord(int src) {
+    vector<float> dist(V);
+    fill(dist.begin(), dist.end(), INT_MAX);
+    dist[src] = 0;
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < G[i].size(); j++) {
+            int eno = G[i][j];
+            pair<int, int> p = edges[eno];
+            int adj = p.first ^p.second ^i;
+            float w = W[eno].second;
+            if (dist[adj] > dist[i] + w) {
+                dist[adj] = dist[i] + w;
+            }
+        }
+    }
+    return dist;
+}
+
+
+//All Pair shortest Path
+float **FloydWarshall() {
+    float **dist = new float *[V];
+    for (int i = 0; i < V; i++) {
+        dist[i] = new float[V];
+        fill(dist[i], dist[i] + V, FLT_MAX);
+        dist[i][i] = 0;
+    }
+    for (int i = 0; i < edges.size(); i++) {
+        pair<int, int> p = edges[i];
+        int u = p.first;
+        int v = p.second;
+        dist[u][v] = dist[v][u] = W[i].second;
+    }
+
+
+    for (int u = 0; u < V; u++) {
+        for (int v = 0; v < V; v++) {
+            for (int k = 0; k < V; k++) {
+                if (dist[u][v] > dist[u][k] + dist[k][v]) {
+                    dist[u][v] = dist[u][k] + dist[k][v];
+                }
+            }
+        }
+    }
+    return dist;
+}
+
+
+vector<int> ConnectedComponents() {
+    vector<int> top = TOPSort(0);
     TransposeGraph();
     fill(used, used + V, false);
-    VI comp;
-    REP(i, V) {
+    vector<int> comp;
+    for (int i = 0; i < V; i++) {
         int u = top[i];
         if (used[u] == false) {
             DFS(u);
-            comp.pb(u);
+            comp.push_back(u);
         }
     }
     return comp;
@@ -373,25 +422,25 @@ VI ConnectedComponents() {
 void EularPath() {
     bool flag = true;
     // Check each vertice is of even degree
-    VI vertice;
-    REP(i, V) {
+    vector<int> vertice;
+    for (int i = 0; i < V; i++) {
         /*    if (G[i].size() % 2 == 1)
                 flag = false;
             else {
                 if (G[i].size() > 0) {
-                    vertice.pb(i);
+                    vertice.push_back(i);
                 }
             }*/
 
         if (G[i].size() > 0) {
-            vertice.pb(i);
+            vertice.push_back(i);
         }
     }
 
     int u = vertice.front();
     DFS(u);
     int c = 0;
-    REP(i, vertice.size()) {
+    for (int i = 0; i < vertice.size(); i++) {
         u = vertice[i];
         if (used[u] == false) {
             c++;
@@ -399,7 +448,7 @@ void EularPath() {
     }
     if (c > 0)
         cout << "Eular Path Does Not Exist";
-    else{
+    else {
         cout << "Eular Path Does Exist";
     }
 }
